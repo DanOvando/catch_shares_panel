@@ -13,7 +13,7 @@ destring, replace;
 
 encode stock_cs_id, gen(id);
 
-drop if year <1990;
+drop if year < 1990;
 
 * Set up panel structure;
 
@@ -27,28 +27,81 @@ gen clust = space;
 
 * Set up variables;
 
-gen y = status_bio;
-
 global x TURF;
 
-* Regressions;
+* Regressions on catch;
+
+gen y = log(catch);
 
 eststo:quietly xtreg y $x
-	i.year, vce(cluster clust);
+	i.year, fe vce(cluster clust);
 
 eststo:quietly xtreg y $x
-	i.space, vce(cluster clust);	
+	i.space, fe vce(cluster clust);	
 	
 eststo:quietly xtreg y $x
-	i.space##i.year, vce(cluster clust);
+	i.space##i.year, fe vce(cluster clust);
 
 eststo:quietly xtreg y $x i.cate
-	i.space##i.year, vce(cluster clust);	
+	i.space##i.year, fe vce(cluster clust);	
 
 	
 eststo:quietly xtreg y $x i.cate max age
-	i.space##i.year, vce(cluster clust);	
+	i.space##i.year, fe vce(cluster clust);
+
+esttab, keep($x)
+	se;
+
+eststo clear;	
 	
+* Regressions on b/bmsy;
+
+replace y = status_bio;
+
+eststo:quietly xtreg y $x
+	i.year, fe vce(cluster clust);
+
+eststo:quietly xtreg y $x
+	i.space, fe vce(cluster clust);	
+	
+eststo:quietly xtreg y $x
+	i.space##i.year, fe vce(cluster clust);
+
+eststo:quietly xtreg y $x i.cate
+	i.space##i.year, fe vce(cluster clust);	
+
+	
+eststo:quietly xtreg y $x i.cate max age
+	i.space##i.year, fe vce(cluster clust);	
 	
 esttab, keep($x)
 	se;
+
+eststo clear;	
+	
+* Regressions on f/fmsy;
+
+replace y = status_f;
+
+eststo:quietly xtreg y $x
+	i.year, fe vce(cluster clust);
+
+eststo:quietly xtreg y $x
+	i.space, fe vce(cluster clust);	
+	
+eststo:quietly xtreg y $x
+	i.space##i.year, fe vce(cluster clust);
+
+eststo:quietly xtreg y $x i.cate
+	i.space##i.year, fe vce(cluster clust);	
+
+	
+eststo:quietly xtreg y $x i.cate max age
+	i.space##i.year, fe vce(cluster clust);	
+	
+esttab, keep($x)
+	se;
+
+eststo clear;	
+		
+
